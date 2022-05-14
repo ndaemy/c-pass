@@ -3,9 +3,13 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
+type ServerResponse = {
+  result: "success" | "fail";
+  message: string;
+};
+
 export default function MainStack() {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [barCode, setBarCode] = useState("");
+  const [hasPermission, setHasPermission] = useState<null | boolean>(null);
   const [isReady, setReady] = useState(true);
 
   useEffect(() => {
@@ -15,26 +19,36 @@ export default function MainStack() {
     })();
   }, []);
 
+  const handleResponse = (res: ServerResponse) => {
+    switch (res.result) {
+      case "success":
+        Toast.show({
+          type: "success",
+          text1: res.message,
+        });
+        break;
+      case "fail":
+        Toast.show({
+          type: "error",
+          text1: res.message,
+        });
+    }
+  };
+
+  const sendRequestToServer = (code: string) => {
+    fetch(`${process.env.API_URI}?method=QRCheckIn&num=${code}`)
+      .then(res => res.json())
+      .then(handleResponse);
+  };
+
   const handleBarCodeScanned: BarCodeScannedCallback = ({ data }) => {
     if (!isReady) {
       return;
     }
 
-    if (data === barCode) {
-      Toast.show({
-        type: "error",
-        text1: `${data}는 이미 처리되었습니다.`,
-      });
-      return;
-    }
-
     setReady(false);
-    setBarCode(data);
-    Toast.show({
-      type: "info",
-      text1: `${data}가 읽혔습니다.`,
-      visibilityTime: 3000,
-    });
+
+    sendRequestToServer(data);
 
     setTimeout(() => {
       setReady(true);

@@ -8,7 +8,7 @@ export default function App() {
       <NavigationContainer>
         <RootStack />
       </NavigationContainer>
-      <Toast />
+      <Toast position="bottom" visibilityTime={3000} />
     </>
   );
 }
