@@ -1,6 +1,25 @@
 import { NavigationContainer } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
+import Toast, { ErrorToast, SuccessToast, ToastConfig } from "react-native-toast-message";
 import RootStack from "src/screens/RootStack";
+
+const toastConfig: ToastConfig = {
+  success: props => (
+    <SuccessToast
+      {...props}
+      text1Style={{
+        fontSize: 24,
+      }}
+    />
+  ),
+  error: props => (
+    <ErrorToast
+      {...props}
+      text1Style={{
+        fontSize: 24,
+      }}
+    />
+  ),
+};
 
 export default function App() {
   return (
@@ -8,7 +27,7 @@ export default function App() {
       <NavigationContainer>
         <RootStack />
       </NavigationContainer>
-      <Toast position="bottom" visibilityTime={3000} />
+      <Toast config={toastConfig} position="bottom" visibilityTime={3000} />
     </>
   );
 }
