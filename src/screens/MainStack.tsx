@@ -1,6 +1,6 @@
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Button, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 type ServerResponse = {
@@ -11,6 +11,7 @@ type ServerResponse = {
 export default function MainStack() {
   const [hasPermission, setHasPermission] = useState<null | boolean>(null);
   const [isReady, setReady] = useState(true);
+  const [cameraDirection, setCameraDirection] = useState<"front" | "back">("back");
 
   useEffect(() => {
     (async () => {
@@ -18,6 +19,14 @@ export default function MainStack() {
       setHasPermission(status === "granted");
     })();
   }, []);
+
+  const toggleCameraDirection = () => {
+    if (cameraDirection === "back") {
+      setCameraDirection("front");
+    } else {
+      setCameraDirection("back");
+    }
+  };
 
   const handleResponse = (res: ServerResponse) => {
     switch (res.result) {
@@ -36,6 +45,7 @@ export default function MainStack() {
   };
 
   const sendRequestToServer = (code: string) => {
+    console.log(code);
     fetch(`${process.env.API_URI}?method=QRCheckIn&num=${code}`)
       .then(res => res.json())
       .then(handleResponse);
@@ -66,8 +76,12 @@ export default function MainStack() {
     <View style={styles.container}>
       <BarCodeScanner
         onBarCodeScanned={handleBarCodeScanned}
+        type={cameraDirection}
         style={StyleSheet.absoluteFillObject}
       />
+      <SafeAreaView style={styles.buttonContainer}>
+        <Button title="카메라 전환" onPress={toggleCameraDirection} />
+      </SafeAreaView>
     </View>
   );
 }
@@ -77,5 +91,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     justifyContent: "center",
+  },
+  buttonContainer: {
+    position: "absolute",
+    top: 12,
+    right: 14,
   },
 });
